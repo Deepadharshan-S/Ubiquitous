@@ -1,0 +1,25 @@
+# Ignore Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignore virtual environment
+venv/
+
+# Ignore system-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore dependency directories (they can be recreated using requirements.txt)
+lib/
+lib64/
+bin/
+include/
+pyvenv.cfg
+
+# Ignore IDE-specific files
+.vscode/
+.idea/
+
+# Ignore log and temporary files
+*.log
