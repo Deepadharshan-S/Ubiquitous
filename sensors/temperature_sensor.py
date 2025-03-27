@@ -14,7 +14,7 @@ MOSQUITTO_ALERT_TOPIC = "sensor/alerts"  # Listening topic
 
 lock=threading.Lock()
 
-data = pd.read_csv('/home/deepadharshan/Desktop/Ubiquitous/Sensors/Crop_recommendationV2.csv')
+data = pd.read_csv('/home/coder/project/Ubiquitous/Crop_recommendationV2.csv')
 temperature_data = data['temperature'].to_list()
 
 thingsboard_client = mqtt.Client()

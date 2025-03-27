@@ -1,4 +1,4 @@
-#!/home/deepadharshan/Desktop/Ubiquitous/smart_farming/venv/bin/python3
+#!/home/coder/project/Ubiquitous/venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys
