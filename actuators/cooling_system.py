@@ -1,34 +1,110 @@
 import paho.mqtt.client as mqtt
 import time
+import json
 import threading
-
-lock = threading.Lock()
 
 MOSQUITTO_HOST = "localhost"
 MOSQUITTO_PORT = 1883
-MOSQUITTO_TOPIC = "sensor/temperature"
+MOSQUITTO_TOPIC = "sensor/readings"
+MOSQUITTO_ALERT_TOPIC = "sensor/alerts"
+MOSQUITTO_ACK_TOPIC = "sensor/ack"  
+
+ack_lock = threading.Lock()
+ack_received = False 
+
+
+class CoolingSystem:
+    def __init__(self):
+        self.window = []
+        self.mqtt_client = mqtt.Client()
+        self.status = False  
+
+        try:
+            self.mqtt_client.connect(MOSQUITTO_HOST, MOSQUITTO_PORT, 60)
+        except Exception as e:
+            print(f"MQTT connection error: {e}")
+            exit(1)
+
+        self.mqtt_client.on_message = self.on_ack_message
+        self.mqtt_client.subscribe(MOSQUITTO_ACK_TOPIC)
+        self.mqtt_client.loop_start()
+
+    def on_ack_message(self, client, userdata, msg):
+        global ack_received
+        message = msg.payload.decode().strip()
+        if message == "COOLING SYSTEM ACKNOWLEDGED":
+            with ack_lock:
+                ack_received = True
+            print("[ACK] Cooling System Acknowledged.")
+
+    def add_temperature(self, temperature):
+        self.window.append(temperature)
+        if len(self.window) > 20:
+            self.window.pop(0)
+
+        if self.window: 
+            avg_temp = sum(self.window) / len(self.window)
+            print(f"Avg Temp: {avg_temp:.2f}°C")
+
+            if avg_temp >= 25 and not self.status:
+                self.send_alert()  # Cooling ON
+            elif avg_temp < 25 and self.status:
+                self.turn_off_cooling()  # Cooling OFF
+
+    def send_alert(self):
+        global ack_received
+        if not self.status:
+            print("Cooling System ON!")
+            ack_received = False 
+            while not ack_received:
+                self.mqtt_client.publish(MOSQUITTO_ALERT_TOPIC, "TURNING THE COOLING SYSTEM ON")
+                print("Sent alert: TURNING THE COOLING SYSTEM ON")
+                time.sleep(5)  
+
+            self.status = True 
+
+    def turn_off_cooling(self):
+        
+        if self.status:
+            print("Cooling System OFF!")
+            self.mqtt_client.publish(MOSQUITTO_ALERT_TOPIC, "TURNING THE COOLING SYSTEM OFF")
+            self.status = False  
+
+
+actuator = CoolingSystem()
+
 
 def on_message(client, userdata, msg):
-    with lock:
-        print(f"\n🔔 [Received] Topic: {msg.topic} | Message: {msg.payload.decode()}\n")
+    try:
+        print(f"\n[Received] {msg.topic} | {msg.payload.decode()}\n")
+        data = json.loads(msg.payload.decode())  
+
+        if "temperature" in data:
+            temperature = float(data["temperature"])
+            print(f"Temperature: {temperature}°C")
+            actuator.add_temperature(temperature)
+
+    except Exception as e:
+        print(f"Error processing message: {e}")
+
 
 mosquitto_client = mqtt.Client()
-
 mosquitto_client.on_message = on_message
 
-mosquitto_client.connect(MOSQUITTO_HOST, MOSQUITTO_PORT, 60)
-
-mosquitto_client.subscribe(MOSQUITTO_TOPIC)
-
-mosquitto_client.loop_start()
-
-print(f"Subscribed to {MOSQUITTO_TOPIC}. Waiting for messages...")
-
 try:
+    mosquitto_client.connect(MOSQUITTO_HOST, MOSQUITTO_PORT, 60)
+    mosquitto_client.subscribe(MOSQUITTO_TOPIC)
+    mosquitto_client.loop_start()
+
+    print(f"Subscribed to {MOSQUITTO_TOPIC}. Waiting for messages...")
+
     while True:
-        pass
+        time.sleep(1)
+
 except KeyboardInterrupt:
-    print("Exiting...")
+    print("\nShutting down...")
+
 finally:
-    mosquitto_client.loop_stop()  # Stop the loop
-    mosquitto_client.disconnect()  # Disconnect from the broker
+    mosquitto_client.loop_stop()
+    mosquitto_client.disconnect()
+    print("MQTT Disconnected. Exiting.")

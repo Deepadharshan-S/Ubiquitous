@@ -6,20 +6,20 @@ __pycache__/
 # Ignore virtual environment
 venv/
 
-# Ignore system-specific files
-.DS_Store
-Thumbs.db
-
-# Ignore dependency directories (they can be recreated using requirements.txt)
+# Ignore dependency folders
 lib/
 lib64/
 bin/
 include/
 pyvenv.cfg
 
+# Ignore system-specific files
+.DS_Store
+Thumbs.db
+
 # Ignore IDE-specific files
 .vscode/
 .idea/
 
-# Ignore log and temporary files
+# Ignore logs
 *.log
