@@ -20,7 +20,7 @@ FLAG = True
 flag_lock = threading.Lock()
 
 try:
-    data = pd.read_csv('../Crop_recommendationV2.csv')
+    data = pd.read_csv('/home/deepadharshan/Downloads/Ubiquitous/Crop_recommendationV2.csv')
     temperature_data = data['temperature'].to_list()
 except Exception as e:
     print(f"Error reading CSV file: {e}")
