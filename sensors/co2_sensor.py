@@ -43,7 +43,7 @@ def send_random_concentrations():
         random_temperature = round(random.uniform(300, 350), 2)
         payload = json.dumps({"CO2": random_temperature})
         
-        print(f"[Mosquitto] Publishing Cooling System Temp: {payload}")
+        print(f"[Mosquitto] Publishing Ventilation System Concentration: {payload}")
         mosquitto_client.publish(MOSQUITTO_TOPIC, payload)
         thingsboard_client.publish(THINGSBOARD_TOPIC, payload)
         
