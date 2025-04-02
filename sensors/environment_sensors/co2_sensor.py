@@ -83,7 +83,7 @@ try:
                     if FLAG:
                         break
                 print("Ventilation system is active...")
-                time.sleep(1)
+                time.sleep(2)
             
             try:
                 payload = json.dumps({"CO2": sample})
@@ -93,7 +93,7 @@ try:
                 print(f"[Mosquitto] Publishing: {payload}")
                 mosquitto_client.publish(MOSQUITTO_TOPIC, payload)
                 
-                time.sleep(1)
+                time.sleep(2)
             except Exception as e:
                 print(f"Error publishing MQTT message: {e}")
 

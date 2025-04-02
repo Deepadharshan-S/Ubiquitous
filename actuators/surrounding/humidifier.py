@@ -61,7 +61,7 @@ class HumidityControlSystem:
             while not ack_received:
                 self.mqtt_client.publish(MOSQUITTO_ALERT_TOPIC, "TURNING HUMIDIFIER ON")
                 print("Sent alert: TURNING HUMIDIFIER ON")
-                time.sleep(1)  
+                time.sleep(2)  
 
             self.status = True  
 
@@ -77,7 +77,6 @@ actuator = HumidityControlSystem()
 
 def on_message(client, userdata, msg):
     try:
-        print(f"\n[Received] {msg.topic} | {msg.payload.decode()}\n")
         data = json.loads(msg.payload.decode())  
 
         if "humidity" in data:
@@ -100,7 +99,7 @@ try:
     print(f"Subscribed to {MOSQUITTO_TOPIC}. Waiting for messages...")
 
     while True:
-        time.sleep(1)
+        time.sleep(2)
 
 except KeyboardInterrupt:
     print("\nShutting down...")

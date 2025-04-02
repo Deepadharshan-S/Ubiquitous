@@ -6,7 +6,7 @@ import random
 import threading
 
 THINGSBOARD_HOST = "demo.thingsboard.io"
-THINGSBOARD_ACCESS_TOKEN = "in75gn0cpos84fphb8g1"
+THINGSBOARD_ACCESS_TOKEN = "q6qfq9v40tbzybzlzo6p"
 THINGSBOARD_TOPIC = "v1/devices/me/telemetry"
 
 MOSQUITTO_HOST = "localhost"
@@ -46,7 +46,7 @@ def send_random_humidity_values():
         mosquitto_client.publish(MOSQUITTO_TOPIC, payload)
         thingsboard_client.publish(THINGSBOARD_TOPIC, payload)
         
-        time.sleep(1)  
+        time.sleep(2)  
 
 def on_message(client, userdata, msg):
     global HUMIDIFIER_FLAG
@@ -82,7 +82,7 @@ try:
                     if HUMIDIFIER_FLAG:
                         break
                 print("HUMIDIFIER is active...")
-                time.sleep(1)
+                time.sleep(2)
             
             try:
                 payload = json.dumps({"humidity": sample})
@@ -92,7 +92,7 @@ try:
                 print(f"[Mosquitto] Publishing: {payload}")
                 mosquitto_client.publish(MOSQUITTO_TOPIC, payload)
                 
-                time.sleep(1)
+                time.sleep(2)
             except Exception as e:
                 print(f"Error publishing MQTT message: {e}")
 

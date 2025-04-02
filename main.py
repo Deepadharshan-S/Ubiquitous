@@ -1,22 +1,25 @@
 import os
 
-# Define thresholds for different crops
 CROP_THRESHOLDS = {
-    "carrot": {"temperature": 22, "humidity": 50, "co2": 600},
-    "beans": {"temperature": 25, "humidity": 55, "co2": 700},
-    "tomato": {"temperature": 26, "humidity": 60, "co2": 750},
+    "carrot": {"TEMP_THRESHOLD": 20, "HUMIDITY_THRESHOLD": 50, "CO2_THRESHOLD": 400},
+    "beans": {"TEMP_THRESHOLD": 25, "HUMIDITY_THRESHOLD": 60, "CO2_THRESHOLD": 450},
+    "tomato": {"TEMP_THRESHOLD": 22, "HUMIDITY_THRESHOLD": 55, "CO2_THRESHOLD": 420},
 }
 
 def set_environment_variables(crop):
     if crop in CROP_THRESHOLDS:
         thresholds = CROP_THRESHOLDS[crop]
-        os.environ["TEMP_THRESHOLD"] = str(thresholds["temperature"])
-        os.environ["HUMIDITY_THRESHOLD"] = str(thresholds["humidity"])
-        os.environ["CO2_THRESHOLD"] = str(thresholds["co2"])
-        print(f"Thresholds set for {crop}: {thresholds}")
+        os.environ["TEMP_THRESHOLD"] = str(thresholds["TEMP_THRESHOLD"])
+        os.environ["HUMIDITY_THRESHOLD"] = str(thresholds["HUMIDITY_THRESHOLD"])
+        os.environ["CO2_THRESHOLD"] = str(thresholds["CO2_THRESHOLD"])
+
+        # Print only export commands (no extra text)
+        print(f'export TEMP_THRESHOLD={thresholds["TEMP_THRESHOLD"]}')
+        print(f'export HUMIDITY_THRESHOLD={thresholds["HUMIDITY_THRESHOLD"]}')
+        print(f'export CO2_THRESHOLD={thresholds["CO2_THRESHOLD"]}')
     else:
-        print("Invalid crop selected. Available options:", ", ".join(CROP_THRESHOLDS.keys()))
+        exit(1)  # Exit with error code if crop is invalid
 
 if __name__ == "__main__":
-    crop = input("Enter crop name (carrot, beans, tomato): ").strip().lower()
+    crop = input().strip().lower()  # Read input without a prompt message
     set_environment_variables(crop)
