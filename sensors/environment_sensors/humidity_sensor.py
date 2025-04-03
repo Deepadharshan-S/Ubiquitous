@@ -4,6 +4,7 @@ import paho.mqtt.client as mqtt
 import json
 import random
 import threading
+import os
 
 THINGSBOARD_HOST = "demo.thingsboard.io"
 THINGSBOARD_ACCESS_TOKEN = "q6qfq9v40tbzybzlzo6p"
@@ -37,11 +38,14 @@ except Exception as e:
     print(f"MQTT Connection Error: {e}")
     exit(1)
 
-def send_random_humidity_values():
+def send_gradual_humidity():
+    min_humidity = float(os.getenv("HUMIDITY_THRESHOLD", 50))  
+    humidity = min_humidity  
+
     while not HUMIDIFIER_FLAG:
-        random_humidity = round(random.uniform(50, 70), 2)
-        payload = json.dumps({"humidity": random_humidity})
-        
+        humidity = min(100, humidity + round(random.uniform(0.5, 1.5), 2))  
+        payload = json.dumps({"humidity": humidity})
+
         print(f"[Mosquitto] Publishing Humidity Data: {payload}")
         mosquitto_client.publish(MOSQUITTO_TOPIC, payload)
         thingsboard_client.publish(THINGSBOARD_TOPIC, payload)
@@ -60,7 +64,7 @@ def on_message(client, userdata, msg):
                 print("HUMIDIFIER activated. Sending acknowledgment.")
                 mosquitto_client.publish(MOSQUITTO_ACK_TOPIC, "HUMIDIFIER ACKNOWLEDGED")
 
-                threading.Thread(target=send_random_humidity_values, daemon=True).start()
+                threading.Thread(target=send_gradual_humidity, daemon=True).start()
 
             elif message == "TURNING HUMIDIFIER OFF":
                 HUMIDIFIER_FLAG = True

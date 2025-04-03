@@ -10,7 +10,7 @@ MOSQUITTO_TOPIC = "sensor/readings"
 MOSQUITTO_ALERT_TOPIC = "sensor/alerts"
 MOSQUITTO_ACK_TOPIC = "sensor/ack"  
 
-CO2_THRESHOLD = int(os.getenv("CO2_THRESHOLD", 500))
+CO2_THRESHOLD = float(os.getenv("CO2_THRESHOLD", 500.0))
 
 ack_lock = threading.Lock()
 ack_received = False  
@@ -99,7 +99,7 @@ try:
     print(f"Subscribed to {MOSQUITTO_TOPIC}. Waiting for messages...")
 
     while True:
-        time.sleep(2)
+        time.sleep(1)
 
 except KeyboardInterrupt:
     print("\nShutting down...")

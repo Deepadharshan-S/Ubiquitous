@@ -1,12 +1,27 @@
 #!/bin/bash
 source venv/bin/activate
 
-# Get user input
-echo "Enter crop (carrot, beans, tomato): "
+# Get climate conditions and recommended crop
+climate_output=$(python3 main.py --show-climate)  # Run main.py to display conditions
+
+# Display climate conditions and recommended crop
+echo "------------------------------------"
+echo "Climate Conditions & Recommendation:"
+echo "$climate_output" | grep -E "N:|P:|K:|Temperature:|Humidity:|Ph:|Rainfall:|Recommended Crop based on environment:"
+echo "------------------------------------"
+
+# Get user input after displaying climate conditions
+echo -n "Enter crop (or press Enter to use recommended crop): "
 read crop
 
+# If user didn't enter a crop, use the recommended one
+if [ -z "$crop" ]; then
+    crop=$(echo "$climate_output" | grep "Recommended Crop" | awk -F': ' '{print $2}')
+    echo "Using recommended crop: $crop"
+fi
+
 # Get and apply environment variables
-env_vars=$(python3 main.py <<< "$crop")  # Pass input to Python script
+env_vars=$(python3 main.py --set-thresholds "$crop")  # Pass input to Python script
 if [ -z "$env_vars" ]; then
     echo "Invalid crop. Exiting..."
     exit 1

@@ -13,8 +13,7 @@ MOSQUITTO_ACK_TOPIC = "sensor/ack"
 ack_lock = threading.Lock()
 ack_received = False 
 
-TEMPERATURE_THRESHOLD = int(os.getenv("TEMP_THRESHOLD", 25))
-
+TEMPERATURE_THRESHOLD = float(os.getenv("TEMP_THRESHOLD", 25.0))  
 class CoolingSystem:
     def __init__(self):
         self.window = []
@@ -100,7 +99,7 @@ try:
     print(f"Subscribed to {MOSQUITTO_TOPIC}. Waiting for messages...")
 
     while True:
-        time.sleep(2)
+        time.sleep(1)
 
 except KeyboardInterrupt:
     print("\nShutting down...")

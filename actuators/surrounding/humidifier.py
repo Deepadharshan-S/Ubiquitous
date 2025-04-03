@@ -13,7 +13,7 @@ MOSQUITTO_ACK_TOPIC = "sensor/ack"
 ack_lock = threading.Lock()
 ack_received = False  
 
-HUMIDITY_THRESHOLD = int(os.getenv("HUMIDITY_THRESHOLD", 50)) 
+HUMIDITY_THRESHOLD = float(os.getenv("HUMIDITY_THRESHOLD", 50.0))  
 
 class HumidityControlSystem:
     def __init__(self):
@@ -99,7 +99,7 @@ try:
     print(f"Subscribed to {MOSQUITTO_TOPIC}. Waiting for messages...")
 
     while True:
-        time.sleep(2)
+        time.sleep(1)
 
 except KeyboardInterrupt:
     print("\nShutting down...")

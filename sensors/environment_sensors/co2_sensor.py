@@ -4,6 +4,7 @@ import paho.mqtt.client as mqtt
 import json
 import random
 import threading
+import os
 
 THINGSBOARD_HOST = "demo.thingsboard.io"
 THINGSBOARD_ACCESS_TOKEN = "in75gn0cpos84fphb8g1"
@@ -38,16 +39,19 @@ except Exception as e:
     print(f"MQTT Connection Error: {e}")
     exit(1)
 
-def send_random_concentrations():
+def send_gradual_co2_concentrations():
+    max_co2 = float(os.getenv("CO2_THRESHOLD", 350))  # Get max CO2 from env
+    co2_concentration = max_co2  
+
     while not FLAG:
-        random_temperature = round(random.uniform(300, 350), 2)
-        payload = json.dumps({"CO2": random_temperature})
+        co2_concentration = max(300, co2_concentration - round(random.uniform(1, 5), 2))  
+        payload = json.dumps({"CO2": co2_concentration})
         
         print(f"[Mosquitto] Publishing Ventilation System Concentration: {payload}")
         mosquitto_client.publish(MOSQUITTO_TOPIC, payload)
         thingsboard_client.publish(THINGSBOARD_TOPIC, payload)
         
-        time.sleep(2)  
+        time.sleep(2)
 
 def on_message(client, userdata, msg):
     global FLAG
@@ -61,7 +65,7 @@ def on_message(client, userdata, msg):
                 print("Ventilation system activated. Sending acknowledgment.")
                 mosquitto_client.publish(MOSQUITTO_ACK_TOPIC, "VENTILATION SYSTEM ACKNOWLEDGED")
 
-                threading.Thread(target=send_random_concentrations, daemon=True).start()
+                threading.Thread(target=send_gradual_co2_concentrations, daemon=True).start()
 
             elif message == "TURNING VENTILATION OFF":
                 FLAG = True

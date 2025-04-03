@@ -4,6 +4,7 @@ import paho.mqtt.client as mqtt
 import json
 import random
 import threading
+import os
 
 THINGSBOARD_HOST = "demo.thingsboard.io"
 THINGSBOARD_ACCESS_TOKEN = "aYjzIENDYsDlM0hreMl7"
@@ -38,16 +39,19 @@ except Exception as e:
     print(f"MQTT Connection Error: {e}")
     exit(1)
 
-def send_random_temperatures():
+def send_gradual_temperatures():
+    max_temperature = float(os.getenv("TEMP_THRESHOLD", 25))  # Get max temperature from env
+    temperature = max_temperature  
+
     while not FLAG:
-        random_temperature = round(random.uniform(20, 25), 2)
-        payload = json.dumps({"temperature": random_temperature})
+        temperature = max(15, temperature - round(random.uniform(0.2, 0.5), 2))  
+        payload = json.dumps({"temperature": temperature})
         
         print(f"[Mosquitto] Publishing Cooling System Temp: {payload}")
         mosquitto_client.publish(MOSQUITTO_TOPIC, payload)
         thingsboard_client.publish(THINGSBOARD_TOPIC, payload)
         
-        time.sleep(2)  
+        time.sleep(2) 
 
 def on_message(client, userdata, msg):
     global FLAG
@@ -61,7 +65,7 @@ def on_message(client, userdata, msg):
                 print("Cooling system activated. Sending acknowledgment.")
                 mosquitto_client.publish(MOSQUITTO_ACK_TOPIC, "COOLING SYSTEM ACKNOWLEDGED")
 
-                threading.Thread(target=send_random_temperatures, daemon=True).start()
+                threading.Thread(target=send_gradual_temperatures, daemon=True).start()
 
             elif message == "TURNING THE COOLING SYSTEM OFF":
                 FLAG = True
